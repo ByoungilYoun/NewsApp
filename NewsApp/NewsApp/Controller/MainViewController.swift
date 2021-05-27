@@ -15,10 +15,22 @@ class MainViewController : UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     setNavi()
+    getTopStoriesFromApi()
   }
   //MARK: - Functions
   private func setNavi() {
     view.backgroundColor = .white
     title = "News"
+  }
+  
+  private func getTopStoriesFromApi() {
+    APICaller.shared.getTopStories { result in
+      switch result {
+      case .success(let response) :
+        break
+      case .failure(let error) :
+        print(error)
+      }
+    }
   }
 }
