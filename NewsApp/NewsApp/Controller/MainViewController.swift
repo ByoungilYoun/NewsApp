@@ -6,12 +6,14 @@
 //
 
 import UIKit
+import SafariServices
 
 class MainViewController : UIViewController {
   
   //MARK: - Properties
   private let tableView = UITableView()
   
+  private var articles = [Article]()
   private var viewModels = [NewsTableViewCellViewModel]()
   
   //MARK: - Lifecycle
@@ -30,6 +32,8 @@ class MainViewController : UIViewController {
   private func setNavi() {
     view.backgroundColor = .white
     title = "News"
+//    navigationController?.navigationBar.largeContentTitle = "News"
+    navigationController?.navigationBar.prefersLargeTitles = true
   }
   
   private func setTableView() {
@@ -43,6 +47,7 @@ class MainViewController : UIViewController {
     APICaller.shared.getTopStories { [weak self] result in
       switch result {
       case .success(let articles) :
+        self?.articles = articles
         self?.viewModels = articles.compactMap({
           NewsTableViewCellViewModel(title: $0.title ?? "", subtitle: $0.description ?? "", imageURL: URL(string: $0.urlToImage ?? ""))
         })
@@ -76,6 +81,14 @@ extension MainViewController : UITableViewDataSource {
 extension MainViewController : UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
+    let viewModel = articles[indexPath.row]
+    
+    guard let url = URL(string: viewModel.url ?? "") else {
+      return
+    }
+    
+    let vc = SFSafariViewController(url: url)
+    present(vc, animated: true)
   }
   
   func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
